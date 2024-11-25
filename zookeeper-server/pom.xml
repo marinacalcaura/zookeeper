@@ -31,7 +31,21 @@
   <name>Apache ZooKeeper - Server</name>
   <description>ZooKeeper server</description>
 
+  <!-- Badua properties isw2-->
+  <properties>
+    <ba-dua.version>0.6.0</ba-dua.version>
+    <pitest.version>1.5.1</pitest.version>
+  </properties>
   <dependencies>
+    <dependency>
+      <groupId>org.pitest</groupId>
+      <artifactId>pitest</artifactId>
+      <version>${pitest-maven-plugin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-transport-native-epoll</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
@@ -65,10 +79,6 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-transport-native-epoll</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -148,11 +158,17 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <!--dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
+    </dependency-->
+    <!--dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
@@ -166,12 +182,7 @@
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-runner</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.burningwave</groupId>
-      <artifactId>tools</artifactId>
-      <scope>test</scope>
-    </dependency>
+    </dependency-->
     <dependency>
       <groupId>org.xerial.snappy</groupId>
       <artifactId>snappy-java</artifactId>
@@ -181,6 +192,12 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.pitest</groupId>
+      <artifactId>pitest-maven</artifactId>
+      <version>1.5.1</version>
+      <type>maven-plugin</type>
     </dependency>
   </dependencies>
 
@@ -263,6 +280,11 @@
           </execution>
         </executions>
       </plugin>
+      <!--plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.1</version>
+      </plugin-->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -270,16 +292,36 @@
         <configuration>
           <includes>
             <include>**/*Test.java</include>
+             <include>**/Test*.java</include>
           </includes>
-          <forkCount>${surefire-forkcount}</forkCount>
+          <!--forkCount>${surefire-forkcount}</forkCount>
           <reuseForks>false</reuseForks>
           <argLine>-Xmx512m -Dtest.junit.threads=${surefire-forkcount} -Dzookeeper.junit.threadid=${surefire.forkNumber} -javaagent:${org.jmockit:jmockit:jar}</argLine>
           <basedir>${project.basedir}</basedir>
           <systemPropertyVariables>
             <build.test.dir>${project.build.directory}/surefire</build.test.dir>
             <zookeeper.DigestAuthenticationProvider.superDigest>super:D/InIHSb7yEEbrWz8b9l71RjZJU=</zookeeper.DigestAuthenticationProvider.superDigest>
-          </systemPropertyVariables>
+          </systemPropertyVariables-->
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.0.0-M6</version>
+        <configuration>
+          <includes>
+            <include>**/*IT.java</include>
+            <include>ZookeeperClientServerIT.java</include>
+          </includes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -319,6 +361,7 @@
             </Export-Package>
             <Bundle-Name>ZooKeeper Bundle</Bundle-Name>
             <Bundle-DocURL>https://zookeeper.apache.org/doc/current/</Bundle-DocURL>
+            <!--suppress UnresolvedMavenProperty -->
             <Implementation-Build>${mvngit.commit.id}</Implementation-Build>
             <Merge-Headers>!Implementation-Build,*</Merge-Headers>
           </instructions>
@@ -341,4 +384,110 @@
      </plugins>
   </build>
 
+  <profiles>
+
+    <!-- PIT Profile-->
+    <profile>
+      <id>pit-coverage</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.5.1</version>
+            <configuration>
+              <features>+CLASSLIMIT(limit[5])</features>
+              <verbose>true</verbose>
+              <targetClasses>
+                <param>org.apache.zookeeper.client.ConnectStringParser</param>
+              </targetClasses>
+              <targetTests>
+                <param>org.apache.zookeeper.client.ConnectStringParserTest</param>
+              </targetTests>
+            </configuration>
+            <executions>
+              <execution>
+                <id>Mutation Report</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>badua-coverage</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <BADUACLI>${project.build.directory}/lib/ba-dua-cli-0.6.0-all.jar</BADUACLI>
+        <BADUASER>${project.build.directory}/badua.ser</BADUASER>
+        <CLASSES>${project.build.directory}/classes</CLASSES>
+        <BADUAXML>${project.build.directory}/badua.xml</BADUAXML>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0-M5</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <argLine>
+                -javaagent:${project.build.directory}/lib/ba-dua-agent-rt-0.6.0-all.jar
+                -Doutput.file=${BADUASER}
+              </argLine>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>run-baduacli</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>java</executable>
+                  <arguments>
+                    <argument>-jar</argument>
+                    <argument>${BADUACLI}</argument>
+                    <argument>report</argument>
+                    <argument>-input</argument>
+                    <argument>${BADUASER}</argument>
+                    <argument>-classes</argument>
+                    <argument>${CLASSES}</argument>
+                    <argument>-show-classes</argument>
+                    <argument>-show-methods</argument>
+                    <argument>-xml</argument>
+                    <argument>${BADUAXML}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+
+  </profiles>
 </project>

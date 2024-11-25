@@ -65,7 +65,15 @@
     <module>zookeeper-recipes</module>
     <module>zookeeper-assembly</module>
     <module>zookeeper-compatibility-tests</module>
+    <module>tests-jacoco</module>
   </modules>
+
+  <!--repositories>
+    <repository>
+      <id>apache-releases</id>
+      <url>https://repository.apache.org/content/repositories/releases/</url>
+    </repository>
+  </repositories-->
 
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/zookeeper.git</connection>
@@ -536,6 +544,29 @@
         </pluginManagement>
       </build>
     </profile>
+    <!-- jacoco profile -->
+    <profile>
+      <id>jacoco-coverage</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <properties>
@@ -544,11 +575,19 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <surefire.version>2.22.1</surefire.version>
+    <maven-deploy-plugin.version>2.7</maven-deploy-plugin.version>
+
+    <!-- JaCoCo additions -->
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ${project.basedir}/tests-jacoco/target/site/
+      jacoco-aggregate/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
 
     <surefire-forkcount>8</surefire-forkcount>
     <redirectTestOutputToFile>true</redirectTestOutputToFile>
 
     <!-- dependency versions -->
+    <pitest-maven-plugin.version>1.5.1</pitest-maven-plugin.version>
     <slf4j.version>1.7.30</slf4j.version>
     <logback-version>1.2.10</logback-version>
     <audience-annotations.version>0.12.0</audience-annotations.version>
@@ -574,6 +613,8 @@
     <burningwave.mockdns.version>0.25.4</burningwave.mockdns.version>
     <clover-maven-plugin.version>4.4.1</clover-maven-plugin.version>
     <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
+    <pitest-maven-plugin.version>1.5.1</pitest-maven-plugin.version>
+    <jacoco-maven-plugin>0.8.8</jacoco-maven-plugin>
 
     <!-- parameters to pass to C client build -->
     <c-client-openssl>yes</c-client-openssl>
@@ -583,6 +624,17 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>${pitest-maven-plugin.version}</version>
+        <type>maven-plugin</type>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+      </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
         <artifactId>hamcrest-library</artifactId>
@@ -777,6 +829,11 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.6</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <configuration>
@@ -895,7 +952,7 @@
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>${checkstyle.version}</version>
+              <version>6.19</version>
             </dependency>
           </dependencies>
           <configuration>
@@ -1103,7 +1160,9 @@
           <inherited>false</inherited>
           <configuration>
             <!-- update the version inside the C sources -->
+            <!--suppress UnresolvedMavenProperty -->
             <preparationGoals>clean verify -DskipTests antrun:run@replace-cclient-files-during-release scm:add@add-cclient-files-during-release scm:checkin@commit-cclient-files-during-release</preparationGoals>
+            <!--suppress UnresolvedMavenProperty -->
             <completionGoals>clean verify -DskipTests antrun:run@replace-cclient-files-during-release scm:add@add-cclient-files-during-release scm:checkin@commit-cclient-files-during-release</completionGoals>
             <pushChanges>false</pushChanges>
             <localCheckout>true</localCheckout>
