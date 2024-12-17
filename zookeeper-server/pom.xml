@@ -402,10 +402,13 @@
               <features>+CLASSLIMIT(limit[5])</features>
               <verbose>true</verbose>
               <targetClasses>
-                <param>org.apache.zookeeper.client.ConnectStringParser</param>
+                <param>org.apache.zookeeper.server.DataTree</param>
+                <param>org.apache.zookeeper.ZooKeeper</param>
               </targetClasses>
               <targetTests>
-                <param>org.apache.zookeeper.client.ConnectStringParserTest</param>
+                <param>org.apache.zookeeper.server.CreateDataTreeTest</param>
+                <param>org.apache.zookeeper.server.DeleteDataTreeTest</param>
+                <param>org.apache.zookeeper.client.ZookeeperTest</param>
               </targetTests>
             </configuration>
             <executions>
@@ -422,7 +425,7 @@
       </build>
     </profile>
 
-    <profile>
+    <!--profile>
       <id>badua-coverage</id>
       <activation>
         <activeByDefault>false</activeByDefault>
@@ -449,7 +452,7 @@
             </executions>
             <configuration>
               <argLine>
-                -javaagent:${project.build.directory}/lib/ba-dua-agent-rt-0.6.0-all.jar
+                -javaagent:${project.build.directory}/lib/ba-dua-agent-rt-0.8.0-all.jar
                 -Doutput.file=${BADUASER}
               </argLine>
             </configuration>
@@ -462,6 +465,83 @@
               <execution>
                 <id>run-baduacli</id>
                 <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>java</executable>
+                  <arguments>
+                    <argument>-jar</argument>
+                    <argument>${BADUACLI}</argument>
+                    <argument>report</argument>
+                    <argument>-input</argument>
+                    <argument>${BADUASER}</argument>
+                    <argument>-classes</argument>
+                    <argument>${CLASSES}</argument>
+                    <argument>-show-classes</argument>
+                    <argument>-show-methods</argument>
+                    <argument>-xml</argument>
+                    <argument>${BADUAXML}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile-->
+    <!--Ba-dua coverage-->
+    <profile>
+      <id>badua-coverage</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <BADUACLI>./target/lib/ba-dua-cli-0.6.0-all.jar</BADUACLI>
+        <BADUASER>./target/badua.ser</BADUASER>
+        <CLASSES>./target/classes</CLASSES>
+        <BADUAXML>./target/badua.xml</BADUAXML>
+        <argLine>
+          -javaagent:${project.build.directory}/lib/ba-dua-agent-rt-0.6.0-all.jar
+          -Doutput.file=target/badua.ser
+        </argLine>
+      </properties>
+      <build>
+        <plugins>
+          <!-- Plugin per l'unpacking delle dipendenze -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.10</version>
+            <executions>
+              <execution>
+                <id>extract-zip</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>br.usp.each.saeg</groupId>
+                      <artifactId>ba-dua</artifactId>
+                      <version>0.6.0</version>
+                      <type>zip</type>
+                      <outputDirectory>${project.build.directory}</outputDirectory>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.1</version>
+            <executions>
+              <execution>
+                <id>run-baduacli</id>
+                <phase>verify</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
