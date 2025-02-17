@@ -23,7 +23,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven packages
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -33,7 +33,7 @@ jobs:
         run: mvn -B clean verify -P badua-coverage
 
       - name: Upload ba-dua report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: badua.xml
           path: bookkeeper-server/target/badua.xml
