@@ -35,7 +35,7 @@ jobs:
         run: mvn -B clean verify -P pit-coverage
 
       - name: Upload PIT report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pit-reports
           path: bookkeeper-server/target/pit-reports/
