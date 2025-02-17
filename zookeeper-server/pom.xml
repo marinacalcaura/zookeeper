@@ -399,7 +399,7 @@
             <artifactId>pitest-maven</artifactId>
             <version>1.5.1</version>
             <configuration>
-              <features>+CLASSLIMIT(limit[5])</features>
+              <features>+CLASSLIMIT(limit[150])</features>
               <verbose>true</verbose>
               <targetClasses>
                 <param>org.apache.zookeeper.server.DataTree</param>
@@ -409,6 +409,7 @@
                 <param>org.apache.zookeeper.server.CreateDataTreeTest</param>
                 <param>org.apache.zookeeper.server.DeleteDataTreeTest</param>
                 <param>org.apache.zookeeper.client.ZookeeperTest</param>
+                <param>org.apache.zookeeper.client.Zookeeper2Test</param>
               </targetTests>
             </configuration>
             <executions>
