@@ -1,4 +1,4 @@
-name: Apache Bookkeeper CI/CD (Mutation testing)
+name: Apache Zookeeper CI/CD (Mutation testing)
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Verify Zookeeper
-        run: mvn -B clean verify -P pit-coverage
+        run: mvn -B verify -P pit-coverage
 
       - name: Upload PIT report
         uses: actions/upload-artifact@v4
