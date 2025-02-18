@@ -89,27 +89,39 @@ public class ZookeeperTest {
     public static Collection configure(){
         byte[] data = {};
         return Arrays.asList(new Object[][]{
-                {Type.CREATE_NODE, "/test", new byte[10], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
-                {Type.CREATE_INVALID_ACL_EXC, "/test", new byte[10], new ArrayList<ACL>(), CreateMode.EPHEMERAL, 0},
-                {Type.CREATE_INVALID_ACL_EXC, "/test", new byte[10], null, CreateMode.EPHEMERAL, 0},
-                { Type.CREATE_INVALID_ACL_EXC, "/test", data, new ArrayList<ACL>(), CreateMode.EPHEMERAL, 0},
-                {Type.CREATE_NODEEXISTS, "/", new byte[10], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
-                {Type.CREATE_INVALID_ACL_EXC, "/test", data, null, CreateMode.EPHEMERAL,  0},
+                {Type.CREATE_NODE, "/test", "Hello".getBytes(StandardCharsets.UTF_8), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
+                {Type.CREATE_NODE, "/test", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
                 {Type.CREATE_NODE, "/test", data, ZooDefs.Ids.READ_ACL_UNSAFE, CreateMode.PERSISTENT_SEQUENTIAL, 0},
+
+                {Type.CREATE_INVALID_ACL_EXC, "/test", "Hello".getBytes(), new ArrayList<ACL>(), CreateMode.EPHEMERAL, 0},
+                {Type.CREATE_INVALID_ACL_EXC, "/test", "Hello".getBytes(StandardCharsets.UTF_8), null, CreateMode.EPHEMERAL, 0},
+
+                { Type.CREATE_INVALID_ACL_EXC, "/test", data, new ArrayList<ACL>(), CreateMode.EPHEMERAL, 0},
+                {Type.CREATE_INVALID_ACL_EXC, "/test", null, null, CreateMode.EPHEMERAL, 0},
+
+                {Type.CREATE_NODEEXISTS, "/", "Hello".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
+                {Type.CREATE_NODEEXISTS, "/test", "Hello".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
+
                 {Type.CREATE_NoNodeEXC, "/testfail/no/parent", data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
-                {Type.CREATE_NoNodeEXC, "/testfail/no/parent", new byte[2], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
+                {Type.CREATE_NoNodeEXC, "/testfail/no/parent", "Hello".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
+
                 {Type.CREATE_ILLEGAL_ARG_EXC, "a", data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
-                //dovrebbe fallire perchè path sbagliato ma mi sa che va a buon fine
-                {Type.CREATE_ILLEGAL_ARG_EXC, "/a/../c", new byte[2], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
+                {Type.CREATE_ILLEGAL_ARG_EXC, "/a/../c", "Hello".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
+
                 {Type.CREATE_KEEPEREF, "/testeph", data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
-                {Type.CREATE_KEEPEREF, "/testeph", new byte[2], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
+                {Type.CREATE_KEEPEREF, "/testeph", "Hello".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, 0},
 
                 {Type.DELETE_NO_NODE_EXC, "/test_no_node",data,ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT,0},
+
                 {Type.DELETE_BADVERS_EXC,"/test_bad_version",data,ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT,1},
                 {Type.DELETE_BADVERS_EXC,"/test_bad_version2",data,ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT,-2},
+
                 {Type.DELETE_KEEPERNOEMPTY,"/test_delete_children",data,ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT,0},
+
                 {Type.DELETE_NODE, "/test_delete",data,ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT,0},
-                //dovrebe fallire ma va a buon fine
+                //BadArgumentExc
+                //{Type.DELETE_NODE, "/",data,ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT,0},
+
                 {Type.DELETE_ILLEGAL_ARG_EXC, "/../test_delete_illegal",data,ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT,0},
 
 
